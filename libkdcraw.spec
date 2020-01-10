@@ -1,47 +1,35 @@
-Name:    libkdcraw
+Name: libkdcraw
 Summary: A C++ interface around LibRaw library
 Version: 4.10.5
-Release: 4%{?dist}
-
+Release: 5%{?dist}
 # libkdcraw is GPLv2+,
 # LibRaw(bundled) is LGPLv2
 # demosaic-pack GPLv2+ GPLv3+ (addons to libraw)
 License: GPLv2+ and LGPLv2 and GPLv3+
-URL:     https://projects.kde.org/projects/kde/kdegraphics/libs/libkdcraw
-%global revision %(echo %{version} | cut -d. -f3)
-%if %{revision} >= 50
-%global stable unstable
-%else
-%global stable stable
-%endif
-Source0: http://download.kde.org/%{stable}/%{version}/src/%{name}-%{version}.tar.xz
+URL:  https://projects.kde.org/projects/kde/kdegraphics/libs/libkdcraw
+Source0: https://download.kde.org/Attic/4.10.5/src/%{name}-%{version}.tar.xz
+
+# drop bundled libraw and use the system LibRaw
+Patch1: libkdcraw-4.10.5-use-system-libraw.patch
+
 # fix libjpeg detection for libjpeg-turbo, hopefully upstreamable
 # (the hack to add jpeg_mem_src from RawSpeed to LibRaw might not be though)
 Patch50: libkdcraw-4.10.0-libjpeg-turbo.patch
+
 # upstream patches
 Patch100: libkdcraw-4.10.5-CVE-2013-2126.patch
+
 BuildRequires: kdelibs4-devel
-%if 0%{?fedora} > 17
-# libjpeg-turbo-1.2.90+ provides jpeg_mem_src
-%define libjpeg_ver 1.2.90
-%endif
-BuildRequires: libjpeg-turbo-devel%{?libjpeg_ver: >= %{libjpeg_ver}}
+BuildRequires: libjpeg-turbo-devel
 BuildRequires: pkgconfig(lcms2)
 BuildRequires: pkgconfig(jasper)
 BuildRequires: pkgconfig(libxml-2.0)
+BuildRequires: LibRaw-devel
 
 Requires: kdelibs4%{?_isa} >= %{_kde4_version}
-%{?libjpeg_ver:Requires: libjpeg-turbo%{?_isa} >= %{libjpeg_ver}}
 
 # when split occurred
 Conflicts: kdegraphics-libs < 7:4.6.95-10
-
-# upstream plans to unbundle when libraw-1.0 is released
-# see also http://mail.kde.org/pipermail/digikam-devel/2010-March/041682.html
-Provides: bundled(LibRaw)
-# deomosaic-pack addons to libraw
-Provides: bundled(LibRaw-demosaic-pack-GPL2)
-Provides: bundled(LibRaw-demosaic-pack-GPL3)
 
 %description
 Libkdcraw is a C++ interface around LibRaw library used to decode RAW
@@ -52,21 +40,21 @@ http://www.libraw.org.
 Summary:  Development files for %{name} 
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: kdelibs4-devel 
+
 %description devel
 %{summary}.
 
 
 %prep
 %setup -q
+%patch1 -p1 -b .using-system-libraw
 %patch50 -p1 -b .libjpeg-turbo
 
 # upstream patches
 %patch100 -p1 -b .CVE-2013-2126
 
-# copy/rename a few things for easier inclusion as %%doc
-cp -a libraw/README README.libraw
-cp -a libraw/COPYRIGHT COPYRIGHT.libraw
-
+# drop bundled libraw and use the system LibRaw
+rm -rf libraw
 
 %build
 mkdir -p %{_target_platform}
@@ -107,7 +95,6 @@ fi
 
 %files
 %doc AUTHORS ChangeLog COPYING NEWS README TODO
-%doc COPYRIGHT.libraw README.libraw libraw/README.demosaic-packs libraw/LICENSE.LGPL
 %{_kde4_libdir}/libkdcraw.so.22*
 %{_kde4_appsdir}/libkdcraw/
 %{_kde4_iconsdir}/hicolor/*/*/*
@@ -119,6 +106,10 @@ fi
 
 
 %changelog
+* Wed Apr 18 2018 Than Ngo <than@redhat.com> - 4.10.5-5
+- Resolves: #1557171, #1557189, #1558954
+  use the system LibRaw
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 4.10.5-4
 - Mass rebuild 2014-01-24
 
