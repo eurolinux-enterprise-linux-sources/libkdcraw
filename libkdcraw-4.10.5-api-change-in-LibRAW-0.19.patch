@@ -1,0 +1,65 @@
+diff -up libkdcraw-4.10.5/libkdcraw/kdcraw_p.cpp.me libkdcraw-4.10.5/libkdcraw/kdcraw_p.cpp
+--- libkdcraw-4.10.5/libkdcraw/kdcraw_p.cpp.me	2019-01-30 11:04:48.418841203 +0100
++++ libkdcraw-4.10.5/libkdcraw/kdcraw_p.cpp	2019-01-30 11:07:22.459644933 +0100
+@@ -363,6 +363,7 @@ bool KDcraw::Private::loadFromLibraw(con
+             raw.imgdata.params.fbdd_noiserd = lround(m_parent->m_rawDecodingSettings.NRThreshold / 100.0);
+             break;
+         }
++#if !LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 19)
+         case RawDecodingSettings::LINENR:
+         {
+             // (100 - 1000) => (0.001 - 0.02) conversion.
+@@ -379,23 +380,28 @@ bool KDcraw::Private::loadFromLibraw(con
+             raw.imgdata.params.cfa_clean    = true;
+             break;
+         }
++#endif
+         default:   // No Noise Reduction
+         {
+             raw.imgdata.params.threshold    = 0;
+             raw.imgdata.params.fbdd_noiserd = 0;
++#if !LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 19)
+             raw.imgdata.params.linenoise    = 0;
+             raw.imgdata.params.cfaline      = false;
+             raw.imgdata.params.lclean       = 0;
+             raw.imgdata.params.cclean       = 0;
+             raw.imgdata.params.cfa_clean    = false;
++#endif
+             break;
+         }
+     }
+ 
++#if !LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 19)
+     // Chromatic aberration correction.
+     raw.imgdata.params.ca_correc  = m_parent->m_rawDecodingSettings.enableCACorrection;
+     raw.imgdata.params.cared      = m_parent->m_rawDecodingSettings.caMultiplier[0];
+     raw.imgdata.params.cablue     = m_parent->m_rawDecodingSettings.caMultiplier[1];
++#endif
+ 
+     // Exposure Correction before interpolation.
+     raw.imgdata.params.exp_correc = m_parent->m_rawDecodingSettings.expoCorrection;
+@@ -446,8 +452,10 @@ bool KDcraw::Private::loadFromLibraw(con
+ 
+     raw.imgdata.params.dcb_iterations  = m_parent->m_rawDecodingSettings.dcbIterations;
+     raw.imgdata.params.dcb_enhance_fl  = m_parent->m_rawDecodingSettings.dcbEnhanceFl;
++#if !LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0, 19)
+     raw.imgdata.params.eeci_refine     = m_parent->m_rawDecodingSettings.eeciRefine;
+     raw.imgdata.params.es_med_passes   = m_parent->m_rawDecodingSettings.esMedPasses;
++#endif
+ 
+     //-------------------------------------------------------------------------------------------
+ 
+diff -up libkdcraw-4.10.5/libkdcraw/rawdecodingsettings.h.me libkdcraw-4.10.5/libkdcraw/rawdecodingsettings.h
+diff -up libkdcraw-4.10.5/CMakeLists.txt.me libkdcraw-4.10.5/CMakeLists.txt
+--- libkdcraw-4.10.5/CMakeLists.txt.me	2019-01-30 12:16:24.225742377 +0100
++++ libkdcraw-4.10.5/CMakeLists.txt	2019-01-30 12:17:33.263858390 +0100
+@@ -111,6 +111,9 @@ IF(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMP
+     SET(CMAKE_CXX_FLAGS_RELEASE "-O4 -DNDEBUG -DQT_NO_DEBUG")
+ ENDIF(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+ 
++# LibRAW-0.19.2
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -DQT_NO_EXCEPTIONS")
++
+ # ==================================================================================================
+ 
+ ADD_SUBDIRECTORY(libkdcraw)

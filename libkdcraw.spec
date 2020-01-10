@@ -1,7 +1,7 @@
 Name: libkdcraw
 Summary: A C++ interface around LibRaw library
 Version: 4.10.5
-Release: 5%{?dist}
+Release: 7%{?dist}
 # libkdcraw is GPLv2+,
 # LibRaw(bundled) is LGPLv2
 # demosaic-pack GPLv2+ GPLv3+ (addons to libraw)
@@ -11,6 +11,9 @@ Source0: https://download.kde.org/Attic/4.10.5/src/%{name}-%{version}.tar.xz
 
 # drop bundled libraw and use the system LibRaw
 Patch1: libkdcraw-4.10.5-use-system-libraw.patch
+
+# port to build against LibRAW-0.19
+patch2: libkdcraw-4.10.5-api-change-in-LibRAW-0.19.patch
 
 # fix libjpeg detection for libjpeg-turbo, hopefully upstreamable
 # (the hack to add jpeg_mem_src from RawSpeed to LibRaw might not be though)
@@ -48,6 +51,7 @@ Requires: kdelibs4-devel
 %prep
 %setup -q
 %patch1 -p1 -b .using-system-libraw
+%patch2 -p1 -b .api-change-in-LibRAW-0.19
 %patch50 -p1 -b .libjpeg-turbo
 
 # upstream patches
@@ -106,6 +110,12 @@ fi
 
 
 %changelog
+* Wed Feb 13 2019 Than Ngo <than@redhat.com> - 4.10.5-7
+- Related: #1670708 - rebuilt against rebased LibRaw 0.19.2
+
+* Wed Jan 30 2019 Than Ngo <than@redhat.com> - 4.10.5-6
+- Resolves: #1670708 - dependencies issue with rebased LibRaw 0.19.2
+
 * Wed Apr 18 2018 Than Ngo <than@redhat.com> - 4.10.5-5
 - Resolves: #1557171, #1557189, #1558954
   use the system LibRaw
