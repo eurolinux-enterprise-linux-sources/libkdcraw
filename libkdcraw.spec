@@ -1,7 +1,7 @@
 Name:    libkdcraw
 Summary: A C++ interface around LibRaw library
 Version: 4.10.5
-Release: 2%{?dist}
+Release: 4%{?dist}
 
 # libkdcraw is GPLv2+,
 # LibRaw(bundled) is LGPLv2
@@ -119,6 +119,12 @@ fi
 
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 4.10.5-4
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 4.10.5-3
+- Mass rebuild 2013-12-27
+
 * Mon Jul 15 2013 Than Ngo <than@redhat.com> - 4.10.5-2
 - bz#970713, CVE-2013-2126, double-free flaw when handling
   damaged full-color in Foveon and sRAW files
